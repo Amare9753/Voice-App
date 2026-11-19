@@ -2,7 +2,47 @@
 
 Privacy-first voice notes for academic bench scientists. You dictate while your hands are busy. The app keeps a timestamped transcript, suggests structure and scientific wording, and exports a record you have signed. You remain the author: nothing in the transcript, section tags, or label readings changes unless you accept or edit it.
 
-Notes, audio, and photos stay in a SQLite database and files on the device. The app does not send analytics. The only network call is the speech-model download, and it runs only after you tap **Download base English model**.
+There are two clients on the same notebook core:
+
+- **iPhone, no Mac and no Apple Developer account:** the web app in `web/`. Install it from Safari to the home screen. It is a PWA hosted on GitHub Pages.
+- **Android, or iOS with a Mac:** the Expo development build in the repository root.
+
+Notes, audio, and photos stay on the device. There is no analytics. The web app’s only third-party request is the speech-model download, and it runs only after you tap **Download tiny English model**. The native app’s only network call is its own model download.
+
+## Install on an iPhone
+
+Expected site, after GitHub Pages is enabled and `main` has this app:
+
+https://amare9753.github.io/Voice-App/
+
+GitHub does not let this repository turn Pages on by itself. On the repo:
+
+1. Open **Settings → Pages**.
+2. Under **Build and deployment**, set **Source** to **GitHub Actions**.
+3. Merge the web app to `main`. The workflow `.github/workflows/pages.yml` tests the notebook, builds `web/`, and deploys it. You can also run that workflow with **Actions → Deploy GitHub Pages → Run workflow** after Pages is set to GitHub Actions.
+
+On the iPhone:
+
+1. Open the site in Safari (not Chrome).
+2. Tap **Share → Add to Home Screen**.
+3. Open **Core Capture** from the home screen. The first visit needs a network connection so Safari can load the app. After that, the service worker keeps it available offline.
+4. Open **Speech model** and tap **Download tiny English model** once, on Wi-Fi. That downloads `Xenova/whisper-tiny.en` (q8) into the browser cache. Later transcription does not use the network. If the cache is missing, transcription refuses to fetch it again until you tap the button.
+5. Allow the microphone when you tap **Tap to talk**. Allow notifications if you want a system alert when a timer ends. iOS shows notification alerts for a home-screen app; a normal Safari tab may only show the in-app banner. If the phone sleeps, the timer is caught up the next time you open the app.
+
+Push-to-talk is tap to start and tap to stop (press-and-hold also works). Continuous listening runs only while the app is open. Photos use the camera file input. Lot and catalog numbers come from Tesseract in the browser and stay suggestions until you accept them. Export uses the share sheet when Safari allows file sharing, and otherwise downloads the file.
+
+Local check, from a clone:
+
+```bash
+npm install
+npm test
+cd web
+npm install
+npm run build
+npm run preview
+```
+
+Open `http://127.0.0.1:4173/Voice-App/`. `npm run preview` serves the production build at that Pages path. `npm run dev` inside `web/` serves the same app at `/` for day-to-day work.
 
 ## Stack
 
@@ -32,7 +72,7 @@ npm test
 npm run typecheck
 ```
 
-`npm test` covers the data model, section classification, unit and vocabulary normalization, voice commands, timers, SQLite persistence, and all four exporters.
+`npm test` covers the data model, section classification, unit and vocabulary normalization, voice commands, timers, SQLite and IndexedDB persistence, and all four exporters. The web build typechecks that same core inside the PWA.
 
 ## Run on a device or simulator
 
@@ -87,20 +127,23 @@ This environment is Linux, so an iOS binary was not built.
 
 Verified in this Linux environment:
 
-- `npm test` (28 tests): data model, section classification, unit and vocabulary normalization, voice commands, WAV conversion, voice-activity splitting, SQLite persistence, PDF, Markdown, DOCX, and ELN JSON.
-- `npm run typecheck`.
+- `npm test` (29 tests): data model, section classification, unit and vocabulary normalization, voice commands, WAV conversion, voice-activity splitting, SQLite and IndexedDB persistence, PDF, Markdown, DOCX, and ELN JSON.
+- `npm run typecheck` and `cd web && npm run build`.
 - `npx expo prebuild --platform android` followed by `./gradlew assembleDebug`. The debug APK compiled for `arm64-v8a` and `x86_64`, including the whisper.cpp native library and the ML Kit text-recognition module.
 
-Not verified on a device or simulator, because this environment has no iOS toolchain and no running Android emulator with a usable GUI session:
+The PWA was also checked in headless Chromium against a local server that uses the GitHub Pages path `/Voice-App/`. That check loaded the home screen, registered the service worker at that scope, started the microphone with a fake audio device, saved a typed note, showed the suggestion `added 5 µL of DMSO`, accepted it, signed the record, and downloaded Markdown that kept the heard wording in provenance.
 
-- Microphone capture and playback through `expo-audio`.
-- Whisper inference and the model download.
-- ML Kit / Vision OCR on a real image.
-- Timer notifications and the system share sheet.
-- The iOS development build.
+Not verified on a device or simulator, because this environment has no iOS toolchain, no iPhone, and no running Android emulator with a usable GUI session:
+
+- Microphone capture and playback through `expo-audio`, and real iPhone Safari audio, Whisper inference, and Tesseract on a camera photo. The desktop check used a fake microphone and a typed note.
+- The Hugging Face model download on a phone, and whether tiny.en stays within that phone’s memory.
+- Notification alerts from an installed iOS home-screen app. The timer still records in the notebook and shows an in-app banner when the page is open.
+- ML Kit / Vision OCR on a native image, and the iOS development build.
 
 The speech, OCR, recording, notification, and share calls sit behind small modules (`src/services/speech`, `src/services/ocr`, `src/services/audio`, `src/services/notify`, `src/services/export`). The notebook rules those modules feed are the tested part. On a Mac or an Android device, the remaining check is: install the dev build, download the model, record a sentence such as “observation: five microliters, start timer 1 minute”, accept or reject the suggestion, sign, and share each format.
 
 ## Privacy
 
-SQLite file: `core-capture.db` in the app’s database directory. Audio and photos are files under the app documents directory. There is no account, no analytics SDK, and no background upload. Reopening a signed record is an explicit action and clears the signature so you must sign again before the next export.
+The native app stores SQLite in `core-capture.db` and keeps audio and photos in the app documents directory. The web app stores the same records in IndexedDB in the browser, and caches the app shell with a service worker. There is no account, no analytics SDK, and no background upload. Reopening a signed record is an explicit action and clears the signature so you must sign again before the next export.
+
+The in-browser recognizer is `Xenova/whisper-tiny.en` at q8. It is small enough to run as single-thread WebAssembly on an iPhone. `base.en` is more accurate and is large enough that Safari often runs out of memory, so the PWA does not download it. Lab vocabulary is passed as Whisper `prompt_ids` when the tokenizer accepts it, and the same post-ASR suggestions (`five microliters` to `5 µL`) still require your acceptance.

@@ -39,3 +39,8 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# PWA assets copied or downloaded at build time
+web/public/ort/
+web/public/tesseract/
+web/public/tessdata/

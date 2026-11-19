@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { parseLabelSuggestions } from './ocrParse';
-import { decodeWav, encodeWav, resamplePcm16, toWhisperWav } from './wav';
+import { decodeWav, encodeWav, floatToPcm16, resampleFloat32, resamplePcm16, toWhisperWav } from './wav';
 import { INITIAL_VAD, nextVad, rmsPcm16 } from './vad';
-import { confidenceFromSegment, mapWhisperResult, whisperTimeToMs } from '../services/speech/mapResult';
+import { confidenceFromSegment, mapTimestampedChunks, mapWhisperResult, whisperTimeToMs } from '../services/speech/mapResult';
 import { buildAsrPrompt, vocabularyFromSeed } from './vocabulary';
 import { assertUserInitiatedNetwork } from './networkPolicy';
 
@@ -29,6 +29,10 @@ describe('wav and voice activity', () => {
     expect(ready.channels).toBe(1);
     expect(ready.pcm.byteLength).toBeGreaterThan(pcm.byteLength);
     expect(resamplePcm16(decoded.pcm, 16_000, 16_000)).toBe(decoded.pcm);
+    const floats = resampleFloat32(new Float32Array([0, 0.5, -0.5, 0.25]), 8_000, 16_000);
+    expect(floats.length).toBe(8);
+    const spoken = floatToPcm16(new Float32Array([0, 1, -1]));
+    expect(new Int16Array(spoken.buffer)).toEqual(new Int16Array([0, 32767, -32768]));
   });
 
   it('ends a speech region after sustained silence', () => {
@@ -62,6 +66,12 @@ describe('speech mapping and prompt', () => {
       segments: [{ text: ' two bands ', t0: 10, t1: 40, probability: 0.42 }],
     });
     expect(mapped.segments[0]).toMatchObject({ text: 'two bands', startMs: 100, endMs: 400, confidence: 0.42 });
+    const chunks = mapTimestampedChunks({
+      text: 'five microliters',
+      engine: 'transformers.js',
+      chunks: [{ text: ' five microliters ', startSec: 0.2, endSec: 1.5 }],
+    });
+    expect(chunks.segments[0]).toMatchObject({ text: 'five microliters', startMs: 200, endMs: 1500 });
   });
 
   it('builds a bounded on-device prompt from the researcher vocabulary', () => {

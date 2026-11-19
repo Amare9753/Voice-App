@@ -35,6 +35,26 @@ export function confidenceFromSegment(segment: WhisperLikeSegment): number | nul
   return null;
 }
 
+export function mapTimestampedChunks(input: {
+  text: string;
+  chunks?: Array<{ text: string; startSec: number; endSec: number | null }>;
+  engine: string;
+}): SpeechResult {
+  const chunks = (input.chunks ?? [])
+    .map((chunk) => ({
+      text: cleanTranscript(chunk.text),
+      startMs: Math.max(0, Math.round(chunk.startSec * 1000)),
+      endMs: Math.max(0, Math.round((chunk.endSec ?? chunk.startSec) * 1000)),
+      confidence: null,
+    }))
+    .filter((chunk) => chunk.text.length > 0 && !isBlankAudio(chunk.text));
+  const text = cleanTranscript(input.text);
+  if (chunks.length === 0 && text && !isBlankAudio(text)) {
+    chunks.push({ text, startMs: 0, endMs: 0, confidence: null });
+  }
+  return { text: chunks.map((chunk) => chunk.text).join(' ').trim(), segments: chunks, engine: input.engine };
+}
+
 export function mapWhisperResult(input: {
   result: string;
   segments?: WhisperLikeSegment[];

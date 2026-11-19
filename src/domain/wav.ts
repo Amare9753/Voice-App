@@ -89,6 +89,30 @@ export function downmixToMono(pcm: Uint8Array, channels: number): Uint8Array {
   return new Uint8Array(mono.buffer);
 }
 
+export function floatToPcm16(samples: Float32Array): Uint8Array {
+  const pcm = new Int16Array(samples.length);
+  for (let index = 0; index < samples.length; index += 1) {
+    const sample = Math.max(-1, Math.min(1, samples[index] ?? 0));
+    pcm[index] = sample < 0 ? Math.round(sample * 0x8000) : Math.round(sample * 0x7fff);
+  }
+  return new Uint8Array(pcm.buffer);
+}
+
+export function resampleFloat32(input: Float32Array, fromRate: number, toRate: number): Float32Array {
+  if (fromRate === toRate || input.length === 0) return input;
+  const outLength = Math.max(1, Math.round((input.length * toRate) / fromRate));
+  const out = new Float32Array(outLength);
+  const ratio = fromRate / toRate;
+  for (let index = 0; index < outLength; index += 1) {
+    const position = index * ratio;
+    const left = Math.min(input.length - 1, Math.floor(position));
+    const right = Math.min(input.length - 1, left + 1);
+    const fraction = position - Math.floor(position);
+    out[index] = (input[left] ?? 0) * (1 - fraction) + (input[right] ?? 0) * fraction;
+  }
+  return out;
+}
+
 export function toWhisperWav(bytes: Uint8Array): Uint8Array {
   const decoded = decodeWav(bytes);
   if (decoded.bitsPerSample !== 16) {
