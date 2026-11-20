@@ -291,7 +291,7 @@ export function Capture({ id }: { id: string }) {
   return (
     <main className="screen">
       <div className="row">
-        <button type="button" className="ink" onClick={() => go({ name: 'home' })}>Sessions</button>
+        <button type="button" className="ghost" onClick={() => go({ name: 'home' })}>Sessions</button>
         <button type="button" onClick={() => go({ name: 'review', id: record.id })}>Review</button>
       </div>
       <input type="text" value={record.title} disabled={signed} onChange={(event) => remember({ ...record, title: event.target.value })} onBlur={(event) => {
@@ -302,21 +302,38 @@ export function Capture({ id }: { id: string }) {
       <p className={`banner ${busy ? 'warn' : 'info'}`}>{status}</p>
       {signed ? <p className="banner warn">This record is signed. Reopen it from Review before adding notes.</p> : null}
       <div className="row">
-        <button type="button" className={record.recordingMode === 'push-to-talk' ? '' : 'ink'} disabled={signed} onClick={() => void persist(setRecordingMode(record, 'push-to-talk', new Date().toISOString()))}>Push to talk</button>
-        <button type="button" className={record.recordingMode === 'continuous' ? '' : 'ink'} disabled={signed} onClick={() => void persist(setRecordingMode(record, 'continuous', new Date().toISOString()))}>Continuous</button>
+        <button type="button" className={record.recordingMode === 'push-to-talk' ? '' : 'ghost'} disabled={signed} onClick={() => void persist(setRecordingMode(record, 'push-to-talk', new Date().toISOString()))}>Push to talk</button>
+        <button type="button" className={record.recordingMode === 'continuous' ? '' : 'ghost'} disabled={signed} onClick={() => void persist(setRecordingMode(record, 'continuous', new Date().toISOString()))}>Continuous</button>
       </div>
       <p className="kicker">Section</p>
       <div className="grid">
-        <button type="button" className={record.activeSection ? 'ink' : ''} disabled={signed} onClick={() => void chooseSection(null)}>Auto</button>
-        {SECTIONS.map((section) => (
-          <button key={section} type="button" disabled={signed} style={{ background: record.activeSection === section ? sectionColors[section] : '#1c1917' }} onClick={() => void chooseSection(section)}>{SECTION_LABELS[section]}</button>
-        ))}
+        <button type="button" className={record.activeSection ? 'ghost' : ''} disabled={signed} onClick={() => void chooseSection(null)}>Auto</button>
+        {SECTIONS.map((section) => {
+          const selected = record.activeSection === section;
+          return (
+            <button
+              key={section}
+              type="button"
+              className={selected ? '' : 'ghost'}
+              disabled={signed}
+              style={selected ? { background: sectionColors[section] } : undefined}
+              onClick={() => void chooseSection(section)}
+            >
+              <span className="dot" style={{ background: selected ? '#ffffff' : sectionColors[section] }} />
+              {SECTION_LABELS[section]}
+            </button>
+          );
+        })}
       </div>
       {record.recordingMode === 'continuous' ? (
-        <button type="button" className="record" disabled={signed || busy} onClick={() => void toggleContinuous()}>{listening ? 'Stop listening' : 'Start listening'}</button>
+        <button type="button" className={listening ? 'record live' : 'record'} disabled={signed || busy} onClick={() => void toggleContinuous()}>
+          <span className="record-title">{listening ? 'Stop' : 'Listen'}</span>
+          <span className="record-hint">{listening ? 'Tap to finish' : 'Continuous'}</span>
+        </button>
       ) : (
-        <button type="button" className="record" disabled={signed || busy} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}>
-          {listening ? 'Tap to stop' : 'Tap to talk'}
+        <button type="button" className={listening ? 'record live' : 'record'} disabled={signed || busy} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}>
+          <span className="record-title">{listening ? 'Stop' : 'Talk'}</span>
+          <span className="record-hint">{listening ? 'Tap to finish' : 'Tap to start'}</span>
         </button>
       )}
       <div className="row">

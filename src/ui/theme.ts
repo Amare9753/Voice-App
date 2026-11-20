@@ -1,18 +1,18 @@
 import type { SectionId } from '../domain/types';
 
 export const theme = {
-  bg: '#F3F0E8',
-  ink: '#1C1917',
-  muted: '#57534E',
-  card: '#FFFDF8',
-  line: '#D6D3D1',
-  green: '#0F6E56',
+  bg: '#F4F5F7',
+  ink: '#121417',
+  muted: '#5C6570',
+  card: '#FFFFFF',
+  line: '#E3E6EB',
+  green: '#0E6B57',
   greenInk: '#FFFFFF',
-  record: '#B42318',
+  record: '#9F2D2D',
   recordInk: '#FFFFFF',
-  low: '#FDE68A',
-  lowInk: '#78350F',
-  danger: '#9F1239',
+  low: '#FBF3DF',
+  lowInk: '#6D5420',
+  danger: '#8F2433',
 };
 
 export const sectionColors: Record<SectionId, string> = {

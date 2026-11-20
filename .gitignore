@@ -44,3 +44,4 @@ yarn-error.*
 web/public/ort/
 web/public/tesseract/
 web/public/tessdata/
+web/public/samples/

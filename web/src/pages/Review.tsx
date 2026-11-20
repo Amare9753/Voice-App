@@ -136,8 +136,8 @@ export function Review({ id }: { id: string }) {
   return (
     <main className="screen">
       <div className="row">
-        <button type="button" className="ink" onClick={() => go({ name: 'capture', id: record.id })}>Back to capture</button>
-        <button type="button" className="ink" onClick={() => go({ name: 'home' })}>Sessions</button>
+        <button type="button" className="ghost" onClick={() => go({ name: 'capture', id: record.id })}>Capture</button>
+        <button type="button" className="ghost" onClick={() => go({ name: 'home' })}>Sessions</button>
       </div>
       <h1>{record.title}</h1>
       <p>Transcript and structured draft. Edits are yours. Suggestions stay pending until you accept them.</p>
@@ -184,7 +184,7 @@ export function Review({ id }: { id: string }) {
               <p>Suggestion: {utterance.normalization.text}</p>
               <div className="row">
                 <button type="button" disabled={record.status === 'signed'} onClick={() => void commit(acceptNormalization(record, utterance.id, new Date().toISOString()))}>Accept</button>
-                <button type="button" className="ink" disabled={record.status === 'signed'} onClick={() => void commit(rejectNormalization(record, utterance.id, new Date().toISOString()))}>Reject</button>
+                <button type="button" className="ghost" disabled={record.status === 'signed'} onClick={() => void commit(rejectNormalization(record, utterance.id, new Date().toISOString()))}>Reject</button>
               </div>
             </>
           ) : null}
@@ -195,8 +195,8 @@ export function Review({ id }: { id: string }) {
             ))}
           </div>
           <div className="row">
-            <button type="button" className="ink" disabled={record.status === 'signed'} onClick={() => void commit(moveUtterance(record, utterance.id, -1, 'section', new Date().toISOString()))}>Up</button>
-            <button type="button" className="ink" disabled={record.status === 'signed'} onClick={() => void commit(moveUtterance(record, utterance.id, 1, 'section', new Date().toISOString()))}>Down</button>
+            <button type="button" className="ghost" disabled={record.status === 'signed'} onClick={() => void commit(moveUtterance(record, utterance.id, -1, 'section', new Date().toISOString()))}>Up</button>
+            <button type="button" className="ghost" disabled={record.status === 'signed'} onClick={() => void commit(moveUtterance(record, utterance.id, 1, 'section', new Date().toISOString()))}>Down</button>
           </div>
           <div className="row">
             <button type="button" disabled={!utterance.audioUri} onClick={() => void play(utterance)}>Replay</button>
@@ -274,7 +274,7 @@ function PhotoCard({
           {suggestion.decision === 'pending' && record.status === 'draft' ? (
             <div className="row">
               <button type="button" onClick={() => void onCommit(decideOcrSuggestion(record, photo.id, suggestion.id, 'accepted', new Date().toISOString()))}>Accept</button>
-              <button type="button" className="ink" onClick={() => void onCommit(decideOcrSuggestion(record, photo.id, suggestion.id, 'rejected', new Date().toISOString()))}>Reject</button>
+              <button type="button" className="ghost" onClick={() => void onCommit(decideOcrSuggestion(record, photo.id, suggestion.id, 'rejected', new Date().toISOString()))}>Reject</button>
             </div>
           ) : null}
         </div>
