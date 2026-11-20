@@ -1,6 +1,7 @@
 import { env, pipeline } from '@huggingface/transformers';
 import { assertUserInitiatedNetwork } from '@core/domain/networkPolicy';
 import { mapTimestampedChunks, type SpeechResult } from '@core/services/speech/mapResult';
+import { whisperGenerationOptions } from '@core/services/speech/whisperOptions';
 
 export const WHISPER_MODEL = 'Xenova/whisper-tiny.en';
 
@@ -63,17 +64,13 @@ export async function transcribeSamples(samples: Float32Array, prompt: string): 
   }
   const asr = await transcriber;
   const promptIds = vocabularyPromptIds(asr, prompt);
-  const withPrompt = {
-    return_timestamps: true,
-    language: 'en',
-    task: 'transcribe',
-    ...(promptIds ? { prompt_ids: promptIds } : {}),
-  };
+  const options = whisperGenerationOptions({ modelId: WHISPER_MODEL, promptIds });
   let output: AsrOutput;
   try {
-    output = await asr(samples, withPrompt);
-  } catch {
-    output = await asr(samples, { return_timestamps: true, task: 'transcribe' });
+    output = await asr(samples, { ...options });
+  } catch (error) {
+    if (!options.prompt_ids) throw error;
+    output = await asr(samples, { ...whisperGenerationOptions({ modelId: WHISPER_MODEL }) });
   }
   return mapTimestampedChunks({
     text: output.text,

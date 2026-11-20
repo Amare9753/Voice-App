@@ -28,8 +28,14 @@ export function ModelPage() {
 
   return (
     <main className="screen">
-      <button type="button" className="ink" onClick={() => go({ name: 'home' })}>Sessions</button>
-      <h1>Speech model</h1>
+      <button type="button" className="ghost" onClick={() => go({ name: 'home' })}>Sessions</button>
+      <header className="mast">
+        <span className="mark" aria-hidden="true" />
+        <div>
+          <p className="kicker">On device</p>
+          <h1>Speech model</h1>
+        </div>
+      </header>
       <p className={`banner ${ready ? 'info' : 'warn'}`}>{ready ? 'Tiny English model is marked ready in this browser.' : 'No model downloaded yet.'}</p>
       <p>{message}</p>
       <p>Model: {WHISPER_MODEL}, quantized (q8), run with WebAssembly in one thread so iPhone Safari does not need special headers. The ONNX runtime is part of this app. Only the model weights come from Hugging Face, and only after this tap.</p>

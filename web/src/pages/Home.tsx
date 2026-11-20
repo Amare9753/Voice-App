@@ -21,13 +21,18 @@ export function Home() {
 
   return (
     <main className="screen">
-      <p className="kicker">On this phone only</p>
-      <h1>Core Capture</h1>
-      <p className="lead">Dictate a bench note in Safari. You stay the author: suggestions wait until you accept them, and every line keeps its source utterance.</p>
+      <header className="mast">
+        <span className="mark" aria-hidden="true" />
+        <div>
+          <p className="kicker">On this phone</p>
+          <h1>Core Capture</h1>
+        </div>
+      </header>
+      <p className="lead">Dictate a bench note. You stay the author: suggestions wait until you accept them, and every line keeps its source utterance.</p>
       <button type="button" onClick={() => void start()}>New capture</button>
       <div className="row">
-        <button type="button" className="ink" onClick={() => go({ name: 'vocabulary' })}>Vocabulary</button>
-        <button type="button" className="ink" onClick={() => go({ name: 'model' })}>Speech model</button>
+        <button type="button" className="ghost" onClick={() => go({ name: 'vocabulary' })}>Vocabulary</button>
+        <button type="button" className="ghost" onClick={() => go({ name: 'model' })}>Speech model</button>
       </div>
       <h2>Sessions</h2>
       {sessions.length === 0 ? <p className="banner info">No sessions yet. Start a capture when you are at the bench.</p> : null}
@@ -37,6 +42,7 @@ export function Home() {
           <span className="meta">{session.status === 'signed' ? 'Signed' : 'Draft'} · {session.utteranceCount} notes</span>
         </button>
       ))}
+      <p className="version">0.2.0 · stays on this phone</p>
     </main>
   );
 }

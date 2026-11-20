@@ -25,8 +25,14 @@ export function VocabularyPage() {
 
   return (
     <main className="screen">
-      <button type="button" className="ink" onClick={() => go({ name: 'home' })}>Sessions</button>
-      <h1>Lab vocabulary</h1>
+      <button type="button" className="ghost" onClick={() => go({ name: 'home' })}>Sessions</button>
+      <header className="mast">
+        <span className="mark" aria-hidden="true" />
+        <div>
+          <p className="kicker">Bias and spelling</p>
+          <h1>Vocabulary</h1>
+        </div>
+      </header>
       <p>These words are offered to on-device speech as a prompt when the model accepts one, and they suggest spellings after transcription. A record does not change until you accept a suggestion.</p>
       <input type="text" value={spoken} onChange={(event) => setSpoken(event.target.value)} placeholder="Spoken form, e.g. etoh" />
       <input type="text" value={canonical} onChange={(event) => setCanonical(event.target.value)} placeholder="Canonical form, e.g. ethanol" />

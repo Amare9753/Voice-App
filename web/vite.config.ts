@@ -19,8 +19,8 @@ export default defineConfig(({ command }) => {
           orientation: 'portrait',
           start_url: base,
           scope: base,
-          background_color: '#F3F0E8',
-          theme_color: '#0F6E56',
+          background_color: '#F4F5F7',
+          theme_color: '#0E6B57',
           icons: [
             { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
             { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },

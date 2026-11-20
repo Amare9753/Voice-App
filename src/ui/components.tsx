@@ -57,6 +57,7 @@ const styles = StyleSheet.create({
   button: {
     minHeight: minTouch,
     borderRadius: 16,
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 16,

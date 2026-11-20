@@ -27,7 +27,19 @@ On the iPhone:
 2. Tap **Share → Add to Home Screen**.
 3. Open **Core Capture** from the home screen. The first visit needs a network connection so Safari can load the app. After that, the service worker keeps it available offline.
 4. Open **Speech model** and tap **Download tiny English model** once, on Wi-Fi. That downloads `Xenova/whisper-tiny.en` (q8) into the browser cache. Later transcription does not use the network. If the cache is missing, transcription refuses to fetch it again until you tap the button.
-5. Allow the microphone when you tap **Tap to talk**. Allow notifications if you want a system alert when a timer ends. iOS shows notification alerts for a home-screen app; a normal Safari tab may only show the in-app banner. If the phone sleeps, the timer is caught up the next time you open the app.
+5. Allow the microphone when you tap the round Talk button. Allow notifications if you want a system alert when a timer ends. iOS shows notification alerts for a home-screen app; a normal Safari tab may only show the in-app banner. If the phone sleeps, the timer is caught up the next time you open the app.
+
+The English tiny model is English-only, so the app does not send a language or task flag to it. A multilingual checkpoint still receives `language: en` and `task: transcribe`. Lab terms stay in the prompt token list, and the same unit and vocabulary suggestions appear after the transcript.
+
+### Updating an iPhone that already has the app
+
+The service worker checks for a new version when you open the app on Wi-Fi, then reloads once it is in control. iOS often keeps the previous copy until a second launch.
+
+1. Connect to Wi-Fi.
+2. Swipe Core Capture away in the app switcher so it is fully closed.
+3. Open the home-screen icon and leave it in the foreground for a few seconds. The footer should read `0.2.0`.
+4. If it still shows the old screen, close it again and open it once more.
+5. If that still fails, open https://amare9753.github.io/Voice-App/ in Safari, pull down to refresh, then reopen the home-screen icon. Removing and re-adding the icon does not erase the notebook, as long as you do not clear Safari website data for that site.
 
 Push-to-talk is tap to start and tap to stop (press-and-hold also works). Continuous listening runs only while the app is open. Photos use the camera file input. Lot and catalog numbers come from Tesseract in the browser and stay suggestions until you accept them. Export uses the share sheet when Safari allows file sharing, and otherwise downloads the file.
 
@@ -131,7 +143,7 @@ Verified in this Linux environment:
 - `npm run typecheck` and `cd web && npm run build`.
 - `npx expo prebuild --platform android` followed by `./gradlew assembleDebug`. The debug APK compiled for `arm64-v8a` and `x86_64`, including the whisper.cpp native library and the ML Kit text-recognition module.
 
-The PWA was also checked in headless Chromium against a local server that uses the GitHub Pages path `/Voice-App/`. That check loaded the home screen, registered the service worker at that scope, started the microphone with a fake audio device, saved a typed note, showed the suggestion `added 5 µL of DMSO`, accepted it, signed the record, and downloaded Markdown that kept the heard wording in provenance.
+The PWA was also checked in headless Chromium against a local server that uses the GitHub Pages path `/Voice-App/`. That check loaded the home screen, registered the service worker at that scope, started the microphone with a fake audio device, saved a typed note, showed the suggestion `added 5 µL of DMSO`, accepted it, signed the record, and downloaded Markdown that kept the heard wording in provenance. A separate Chromium run loaded `Xenova/whisper-tiny.en` and transcribed the Kennedy sample to “And so my fellow Americans…” without sending `language` or `task`, then confirmed the vocabulary normalization `added five microliters of dmso` → `added 5 µL of DMSO`.
 
 Not verified on a device or simulator, because this environment has no iOS toolchain, no iPhone, and no running Android emulator with a usable GUI session:
 
